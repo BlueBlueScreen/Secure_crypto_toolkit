@@ -1,0 +1,37 @@
+Start testing: Nov 04 15:01 CST
+----------------------------------------------------------
+1/1 Testing: CryptoTest
+1/1 Test: CryptoTest
+Command: "/home/toddray/projects/SecureCryptoToolkit/build/tests/CryptoTest"
+Directory: /home/toddray/projects/SecureCryptoToolkit/build/tests
+"CryptoTest" start time: Nov 04 15:01 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+[==========] Running 5 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 5 tests from SecureRandomTest
+[ RUN      ] SecureRandomTest.RandomBytesZero
+[       OK ] SecureRandomTest.RandomBytesZero (0 ms)
+[ RUN      ] SecureRandomTest.RandomBytes512
+[       OK ] SecureRandomTest.RandomBytes512 (21 ms)
+[ RUN      ] SecureRandomTest.RandomBytes32
+[       OK ] SecureRandomTest.RandomBytes32 (0 ms)
+[ RUN      ] SecureRandomTest.RandomBytes64
+[       OK ] SecureRandomTest.RandomBytes64 (0 ms)
+[ RUN      ] SecureRandomTest.TooLargeRequestThrows
+[       OK ] SecureRandomTest.TooLargeRequestThrows (1 ms)
+[----------] 5 tests from SecureRandomTest (22 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 1 test suite ran. (22 ms total)
+[  PASSED  ] 5 tests.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"CryptoTest" end time: Nov 04 15:01 CST
+"CryptoTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 04 15:01 CST
