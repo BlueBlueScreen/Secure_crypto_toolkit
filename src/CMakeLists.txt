@@ -1,6 +1,5 @@
 #将源文件打包
-set(
-    SCT_SRC
+set(SCT_SRC
     aes_gcm.cpp
     ecdh.cpp
     ed25519.cpp
@@ -10,11 +9,13 @@ set(
 )
 
 #将这些源文件编译成库
-add_library(Toolkit STATIC ${SCT_SRC})
+add_library(Toolkit ${SCT_SRC})
 
 #公开头文件目录
 target_include_directories(Toolkit PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 #链接 OPENSSL库
-target_link_libraries(Toolkit PRIVATE OPENSSL::Crypto)
+#要先find_package才能链接
+find_package(OpenSSL REQUIRED)
+target_link_libraries(Toolkit PRIVATE OpenSSL::Crypto)
 
