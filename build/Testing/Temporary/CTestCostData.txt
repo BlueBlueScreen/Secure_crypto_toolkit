@@ -1,3 +1,2 @@
-CryptoTest 2 0
+CryptoTest 4 0.00099495
 ---
-CryptoTest
