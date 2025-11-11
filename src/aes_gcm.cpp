@@ -1,3 +1,4 @@
+
 #include <openssl/evp.h>
 #include<secure_crypto/aes_gcm.hpp>
 #include <stdexcept>
@@ -27,10 +28,6 @@ namespace secure_crypto{
         vector<uint8_t> nonce=random_bytes(12);
         if (EVP_EncryptInit_ex(ctx, cipher, NULL, key.data(), nonce.data()) != 1)
                 throw runtime_error("secure_crypto::aes_gcm_encrypt: EncryptInit_ex (set key/iv) failed");
-        //获取tag
-        vector<uint8_t> tag(16);
-        if(EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag.data())!=1)
-            throw runtime_error("secure_crypto::aes_gcm_encrypt: Get tag error");
         //开始加密明文
         //可能需要处理附加数据
         if(!aad.empty()){
@@ -50,6 +47,11 @@ namespace secure_crypto{
         if(EVP_EncryptFinal_ex(ctx, out.data()+cipherlen, &outlen)!=1)
          throw runtime_error("secure_crypto::aes_gcm_encrypt: Final Encryption Error");
         cipherlen+=outlen;
+
+        //获取tag
+        vector<uint8_t> tag(16);
+        if(EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag.data())!=1)
+            throw runtime_error("secure_crypto::aes_gcm_encrypt: Get tag error");
         
         //截断缓冲区输出到正常长度
         out.resize(cipherlen);
@@ -67,7 +69,7 @@ namespace secure_crypto{
     
     string aes_gcm_decrypt(
         const vector<uint8_t>& key,
-        tuple<vector<uint8_t>,vector<uint8_t>,vector<uint8_t>>& cipher_tuple,
+        tuple<vector<uint8_t>,vector<uint8_t>,vector<uint8_t>> cipher_tuple,
         const vector<uint8_t>& aad
     ){
         //首先获取解密必要的信息进行检查
@@ -126,3 +128,4 @@ namespace secure_crypto{
     }
 
 }
+

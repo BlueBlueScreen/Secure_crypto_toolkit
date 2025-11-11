@@ -10,6 +10,7 @@ add_executable(CryptoTest
     test_ed25519.cpp
     test_hkdf.cpp
     test_secure_random.cpp
+    test_utils.cpp
     # 注意：如果你用 GTest::gtest_main，就不需要 main.cpp！
 )
 
