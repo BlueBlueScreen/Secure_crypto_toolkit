@@ -9,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/CryptoTest.dir/test_hkdf.cpp.o.d"
   "CMakeFiles/CryptoTest.dir/test_secure_random.cpp.o"
   "CMakeFiles/CryptoTest.dir/test_secure_random.cpp.o.d"
+  "CMakeFiles/CryptoTest.dir/test_utils.cpp.o"
+  "CMakeFiles/CryptoTest.dir/test_utils.cpp.o.d"
   "CryptoTest"
   "CryptoTest.pdb"
 )

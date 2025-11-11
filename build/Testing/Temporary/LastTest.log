@@ -1,25 +1,25 @@
-Start testing: Nov 07 09:23 CST
+Start testing: Nov 11 14:19 CST
 ----------------------------------------------------------
 1/1 Testing: CryptoTest
 1/1 Test: CryptoTest
 Command: "/home/toddray/projects/SecureCryptoToolkit/build/tests/CryptoTest"
 Directory: /home/toddray/projects/SecureCryptoToolkit/build/tests
-"CryptoTest" start time: Nov 07 09:23 CST
+"CryptoTest" start time: Nov 11 14:19 CST
 Output:
 ----------------------------------------------------------
 Running main() from ./googletest/src/gtest_main.cc
-[==========] Running 16 tests from 3 test suites.
+[==========] Running 25 tests from 5 test suites.
 [----------] Global test environment set-up.
 [----------] 4 tests from AESGCMTest
 [ RUN      ] AESGCMTest.Basic128Test
-[       OK ] AESGCMTest.Basic128Test (1 ms)
+[       OK ] AESGCMTest.Basic128Test (22 ms)
 [ RUN      ] AESGCMTest.Basic256Test
 [       OK ] AESGCMTest.Basic256Test (0 ms)
 [ RUN      ] AESGCMTest.NonceWrongTest
-[       OK ] AESGCMTest.NonceWrongTest (0 ms)
+[       OK ] AESGCMTest.NonceWrongTest (1 ms)
 [ RUN      ] AESGCMTest.TagWrongTest
 [       OK ] AESGCMTest.TagWrongTest (0 ms)
-[----------] 4 tests from AESGCMTest (1 ms total)
+[----------] 4 tests from AESGCMTest (24 ms total)
 
 [----------] 7 tests from HKDFTest
 [ RUN      ] HKDFTest.StandartRFCTestSha_256
@@ -51,15 +51,39 @@ Running main() from ./googletest/src/gtest_main.cc
 [       OK ] SecureRandomTest.TooLargeRequestThrows (0 ms)
 [----------] 5 tests from SecureRandomTest (0 ms total)
 
+[----------] 3 tests from Base64Test
+[ RUN      ] Base64Test.BasicTest
+[       OK ] Base64Test.BasicTest (0 ms)
+[ RUN      ] Base64Test.RFC4648Vectors
+[       OK ] Base64Test.RFC4648Vectors (0 ms)
+[ RUN      ] Base64Test.InvalidInputs
+[       OK ] Base64Test.InvalidInputs (0 ms)
+[----------] 3 tests from Base64Test (0 ms total)
+
+[----------] 6 tests from HexTest
+[ RUN      ] HexTest.BasicTest
+[       OK ] HexTest.BasicTest (0 ms)
+[ RUN      ] HexTest.StandardVectors
+[       OK ] HexTest.StandardVectors (0 ms)
+[ RUN      ] HexTest.CaseInsensitive
+[       OK ] HexTest.CaseInsensitive (0 ms)
+[ RUN      ] HexTest.InvalidInputs
+[       OK ] HexTest.InvalidInputs (0 ms)
+[ RUN      ] HexTest.EdgeInputs
+[       OK ] HexTest.EdgeInputs (0 ms)
+[ RUN      ] HexTest.LargeInput
+[       OK ] HexTest.LargeInput (27 ms)
+[----------] 6 tests from HexTest (27 ms total)
+
 [----------] Global test environment tear-down
-[==========] 16 tests from 3 test suites ran. (1 ms total)
-[  PASSED  ] 16 tests.
+[==========] 25 tests from 5 test suites ran. (53 ms total)
+[  PASSED  ] 25 tests.
 <end of output>
-Test time =   0.00 sec
+Test time =   0.06 sec
 ----------------------------------------------------------
 Test Passed.
-"CryptoTest" end time: Nov 07 09:23 CST
+"CryptoTest" end time: Nov 11 14:19 CST
 "CryptoTest" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: Nov 07 09:23 CST
+End testing: Nov 11 14:19 CST
