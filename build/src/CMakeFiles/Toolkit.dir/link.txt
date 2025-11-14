@@ -1,2 +1,0 @@
-/usr/bin/ar qc libToolkit.a CMakeFiles/Toolkit.dir/aes_gcm.cpp.o CMakeFiles/Toolkit.dir/ecdh.cpp.o CMakeFiles/Toolkit.dir/ed25519.cpp.o CMakeFiles/Toolkit.dir/hkdf.cpp.o CMakeFiles/Toolkit.dir/secure_random.cpp.o CMakeFiles/Toolkit.dir/utils.cpp.o
-/usr/bin/ranlib libToolkit.a

@@ -5,6 +5,7 @@ set(SCT_SRC
     ed25519.cpp
     hkdf.cpp
     secure_random.cpp
+    io.cpp
     utils.cpp
 )
 

@@ -25,6 +25,11 @@ void write_private_key_pem(const std::vector<uint8_t>& der_privkey, const std::s
 // 将 DER 编码的公钥写为 PEM 文件
 void write_public_key_pem(const std::vector<uint8_t>& der_pubkey, const std::string& filepath);
 
+//补充两个函数，将EVP_PKEY密钥直接写成PEM文件的，作为工具函数
+void write_private_key(EVP_PKEY* pkey,const string& filepath);
+
+void write_public_key(EVP_PKEY* pkey,const string& filepath);
+
 // 将任意字节写入文件（用于输出 DER、密文、共享密钥等）
 void write_bytes_to_file(const std::vector<uint8_t>& data, const std::string& filepath);
 

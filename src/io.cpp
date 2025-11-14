@@ -106,8 +106,8 @@ namespace secure_crypto{
             //没法直接拿&取.data()后的值，所以得额外创立一个指针
             //将der格式的数据转换为pem格式数据,注意，私钥因为底层设计，是有必要检查底层类型的
             const unsigned char* p=der_privkey.data();
-            d2i_PrivateKey(EVP_PKEY_NONE,&sk,&p,der_privkey.size());
-            if(!sk)  throw runtime_error("secure_crypto::write_private_key_pem: d2i_PrivateKey fail");
+            d2i_AutoPrivateKey(&sk,&p,der_privkey.size());
+            if(!sk)  throw runtime_error("secure_crypto::write_private_key_pem: d2i_AutoprivateKey fail");
             //写入文件
             if(PEM_write_bio_PrivateKey(bio,sk,NULL,NULL,0,NULL,NULL)!=1)
                 throw runtime_error("secure_crypto::write_private_key_pem: PEM_write_bio_PrivateKey");
@@ -144,7 +144,37 @@ namespace secure_crypto{
         }
     }
 
-    
+    void write_private_key(EVP_PKEY* pkey,const string& filepath){
+        BIO* bio=nullptr;
+        try{
+            bio=BIO_new_file(filepath.data(),"w");
+            if(!bio) throw runtime_error("secure_crypto::write_private_key_pem: BIO_new_file failed");
+            //写入文件
+            if(PEM_write_bio_PrivateKey(bio,pkey,NULL,NULL,0,NULL,NULL)!=1)
+                throw runtime_error("secure_crypto::write_private_key_pem: PEM_write_bio_PrivateKey");
+            BIO_free(bio);
+        }catch(...){
+            if(bio) BIO_free(bio);
+            throw;
+        }
+
+    }
+
+    void write_public_key(EVP_PKEY* pkey,const string& filepath){
+        BIO* bio=nullptr;
+        try{
+            bio=BIO_new_file(filepath.data(),"w");
+            if(!bio) throw runtime_error("secure_crypto::write_public_key_pem: BIO_new_file failed");
+
+            if(PEM_write_bio_PUBKEY(bio,pkey)!=1)
+                throw runtime_error("secure_crypto::write_public_key_pem: PEM_write_bio_PUBKEY");
+            BIO_free(bio);
+        }catch(...){
+            if(bio) BIO_free(bio);
+            throw;
+        }
+    }
+
     void write_bytes_to_file(const std::vector<uint8_t>& data, const std::string& filepath){
         ofstream file(filepath,ios::binary);
         if(!file) throw runtime_error("secure_crypto::write_bytes_to_file: file initiate fail");
