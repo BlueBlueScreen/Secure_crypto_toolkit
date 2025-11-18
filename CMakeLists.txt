@@ -13,4 +13,4 @@ enable_testing() #在此处允许测试
 #指定子目录-先库->测试->性能测评
 add_subdirectory(src)
 add_subdirectory(tests)
-# add_subdirectory(benchmarks)
+add_subdirectory(benchmarks)
