@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/Bench_mark_test.dir/bench_aes_gcm.cpp.o -o Bench_mark_test  ../src/libToolkit.a /usr/lib/x86_64-linux-gnu/libcrypto.so 
