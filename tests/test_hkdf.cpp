@@ -1,93 +1,86 @@
-#include<secure_crypto/hkdf.hpp>
-#include<gtest/gtest.h>
-#include <sys/types.h>
+#include <gtest/gtest.h>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <secure_crypto/hkdf.hpp>
 
-//采用RFC5869标准测试向量SHA-256组进行测试
+using std::vector;
+using std::string;
 
-TEST(HKDFTest,StandartRFCTestSha_256){
-    const std::vector<uint8_t> ikm = {
-        0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b,
-        0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b,
-        0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b
-    };
-    const std::vector<uint8_t> salt = {
-        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-        0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c
-    }; // 13 bytes
-    const std::vector<uint8_t> info = {
-    0xf0, 0xf1, 0xf2, 0xf3, 0xf4,
-    0xf5, 0xf6, 0xf7, 0xf8, 0xf9
-}; // 10 bytes
-    size_t n=42;
-
-    vector<uint8_t> key=secure_crypto::hkdf_sha256(ikm, n,salt,info);
-    const std::vector<uint8_t> okm_expected = {
-    0x3c, 0xb2, 0x5f, 0x25, 0xfa, 0xac, 0xd5, 0x7a,
-    0x90, 0x43, 0x4f, 0x64, 0xd0, 0x36, 0x2f, 0x2a,
-    0x2d, 0x2d, 0x0a, 0x90, 0xcf, 0x1a, 0x5a, 0x4c,
-    0x5d, 0xb0, 0x2d, 0x56, 0xec, 0xc4, 0xc5, 0xbf,
-    0x34, 0x00, 0x72, 0x08, 0xd5, 0xb8, 0x87, 0x18,
-    0x58, 0x65
-};
-
-    EXPECT_EQ(key,okm_expected);
+static vector<uint8_t> unhex(const string& hex) {
+    vector<uint8_t> out;
+    for (size_t i = 0; i < hex.size(); i += 2) {
+        out.push_back(static_cast<uint8_t>(std::stoul(hex.substr(i, 2), NULL, 16)));
+    }
+    return out;
 }
 
-TEST(HKDFTest,EmptySaltTest){
-    const vector<uint8_t> ikm(22,0x0b);
-    const vector<uint8_t> salt;
-    const vector<uint8_t> info(10,0x0b);
-    auto okm=secure_crypto::hkdf_sha256(ikm, 42,salt,info);
-    EXPECT_EQ(okm.size(),42);
+// RFC 5869 A.1 Test Case 1（SHA-256）
+TEST(HKDFTest, Rfc5869TestCase1) {
+    const vector<uint8_t> ikm(22, 0x0b);
+    const vector<uint8_t> salt = unhex("000102030405060708090a0b0c");
+    const vector<uint8_t> info = unhex("f0f1f2f3f4f5f6f7f8f9");
+
+    const vector<uint8_t> okm = secure_crypto::hkdf_sha256(ikm, 42, salt, info);
+    const vector<uint8_t> expected = unhex(
+        "3cb25f25faacd57a90434f64d0362f2a"
+        "2d2d0a90cf1a5a4c5db02d56ecc4c5bf"
+        "34007208d5b887185865");
+    EXPECT_EQ(okm, expected);
 }
 
-TEST(HKDFTest, EmptyInfoTest) {
-    vector<uint8_t> ikm(22, 0x0b);
-    vector<uint8_t> salt(13, 0x01);
-    vector<uint8_t> info; // 空
-    auto okm = secure_crypto::hkdf_sha256(ikm, 32, salt, info);
-    EXPECT_EQ(okm.size(), 32);
+// RFC 5869 A.1 Test Case 3：salt / info 省略（空 salt 按 RFC 应补 HashLen 个 0）
+TEST(HKDFTest, Rfc5869TestCase3) {
+    const vector<uint8_t> ikm(22, 0x0b);
+    const vector<uint8_t> okm = secure_crypto::hkdf_sha256(ikm, 42);
+    const vector<uint8_t> expected = unhex(
+        "8da4e775a563c18f715f802a063c5a31"
+        "b8a11f5c5ee1879ec3454e5f3c738d2d"
+        "9d201395faa4b61a96c8");
+    EXPECT_EQ(okm, expected);
 }
 
-TEST(HKDFTest, EmptyKeyTest) {
-    vector<uint8_t> ikm;
-    vector<uint8_t> salt(13, 0x01);
-    vector<uint8_t> info(10, 0x02);
-    EXPECT_THROW({
-        auto okm = secure_crypto::hkdf_sha256(ikm, 32, salt, info);
-    }, std::runtime_error);
+TEST(HKDFTest, EmptySaltAndInfoDefault) {
+    // 默认参数（不传 salt / info）应与显式传空一致
+    const vector<uint8_t> ikm(22, 0x0b);
+    auto k1 = secure_crypto::hkdf_sha256(ikm, 32);
+    auto k2 = secure_crypto::hkdf_sha256(ikm, 32, {}, {});
+    EXPECT_EQ(k1, k2);
 }
 
-TEST(HKDFTest,TooLongKeyTest){
-    const vector<uint8_t> ikm(22,0x01);
-    const vector<uint8_t> salt(13,0x02);
-    const vector<uint8_t> info(10,0x03);
-    //HKDF要求的长度是不大于255*hash_len
-    size_t n=255*32+1;
-        EXPECT_THROW({
-        auto okm = secure_crypto::hkdf_sha256(ikm, n, salt, info);
-    }, std::runtime_error);
+TEST(HKDFTest, EmptyIkmRejected) {
+    // 空的输入密钥材料没有安全意义，应报错而不是产出全零密钥
+    EXPECT_THROW(secure_crypto::hkdf_sha256({}, 32, vector<uint8_t>(13, 0x01),
+                                            vector<uint8_t>(10, 0x02)),
+                 std::runtime_error);
 }
 
-TEST(HKDFTest,ConsistencyTest){
-    const vector<uint8_t> ikm(22,0x01);
-    const vector<uint8_t> salt(13,0x02);
-    const vector<uint8_t> info(10,0x03);
-    //HKDF要求的长度是不大于255*hash_len
-    auto okm1=secure_crypto::hkdf_sha256(ikm, 56,salt,info);
-    auto okm2=secure_crypto::hkdf_sha256(ikm, 56,salt,info);
-    EXPECT_EQ(okm1,okm2);
+TEST(HKDFTest, TooLongOutputRejected) {
+    // RFC 5869 限制 L <= 255 * HashLen
+    const vector<uint8_t> ikm(22, 0x01);
+    EXPECT_THROW(secure_crypto::hkdf_sha256(ikm, 255 * 32 + 1,
+                                            vector<uint8_t>(13, 0x02)),
+                 std::runtime_error);
 }
 
-TEST(HKDFTest,SensitivityTest){
-    const vector<uint8_t> ikm(22,0x01);
-    const vector<uint8_t> salt(13,0x02);
-    vector<uint8_t> info(10,0x03);
-    //HKDF要求的长度是不大于255*hash_len
-    auto okm1=secure_crypto::hkdf_sha256(ikm, 56,salt,info);
-    info[0]^=0x01;
-    auto okm2=secure_crypto::hkdf_sha256(ikm, 56,salt,info);
-    EXPECT_NE(okm1,okm2);
+TEST(HKDFTest, Deterministic) {
+    const vector<uint8_t> ikm(22, 0x01);
+    const vector<uint8_t> salt(13, 0x02);
+    const vector<uint8_t> info(10, 0x03);
+    EXPECT_EQ(secure_crypto::hkdf_sha256(ikm, 56, salt, info),
+              secure_crypto::hkdf_sha256(ikm, 56, salt, info));
 }
 
-
+TEST(HKDFTest, InputSensitivity) {
+    // salt / info 各改 1 bit，输出应完全不同（雪崩性）
+    const vector<uint8_t> ikm(22, 0x01);
+    vector<uint8_t> salt(13, 0x02);
+    vector<uint8_t> info(10, 0x03);
+    auto okm1 = secure_crypto::hkdf_sha256(ikm, 56, salt, info);
+    salt[0] ^= 0x01;
+    auto okm2 = secure_crypto::hkdf_sha256(ikm, 56, salt, info);
+    EXPECT_NE(okm1, okm2);
+    info[0] ^= 0x01;
+    auto okm3 = secure_crypto::hkdf_sha256(ikm, 56, salt, info);
+    EXPECT_NE(okm2, okm3);
+}

@@ -1,72 +1,64 @@
-#include<secure_crypto/ed25519.hpp>
-#include<secure_crypto/io.hpp>
-#include<gtest/gtest.h>
-#include<filesystem>
-using namespace std;
+#include <gtest/gtest.h>
+#include <filesystem>
+#include <string>
+#include <vector>
+#include <secure_crypto/ed25519.hpp>
 
-TEST(Ed25519Test,Basictest){
-    namespace fs=std::filesystem;
-    fs::path tmp=fs::temp_directory_path()/"ed25519";
-    fs::create_directory(tmp);
+namespace fs = std::filesystem;
 
-    fs::path sk_path=tmp/"sk_path.pem";
-    fs::path pk_path=tmp/"pk_path.pem";
-
-    secure_crypto::sign_keygen(sk_path.string(),pk_path.string());
-    string message="This is a message to be signed";
-    vector<uint8_t> signature = secure_crypto::sign(sk_path.string(),message);
-    bool res=secure_crypto::verify(signature,pk_path.string(),message);
-    EXPECT_EQ(res,true);
-    fs::remove_all(tmp);
+static std::vector<uint8_t> to_bytes(const std::string& s) {
+    return std::vector<uint8_t>(s.begin(), s.end());
 }
 
-TEST(Ed25519Test,Wrongtest1){
-    namespace fs=std::filesystem;
-    fs::path tmp=fs::temp_directory_path()/"ed25519";
-    fs::create_directory(tmp);
+class Ed25519Test : public ::testing::Test {
+protected:
+    void SetUp() override {
+        tmp = fs::temp_directory_path() /
+              ("sct_ed25519_" + std::string(::testing::UnitTest::GetInstance()->current_test_info()->name()));
+        fs::remove_all(tmp);
+        fs::create_directories(tmp);
+        sk = (tmp / "sk.pem").string();
+        pk = (tmp / "pk.pem").string();
+        secure_crypto::ed25519_keygen(sk, pk);
+    }
+    void TearDown() override { fs::remove_all(tmp); }
+    fs::path tmp;
+    std::string sk, pk;
+};
 
-    fs::path sk_path=tmp/"sk_path.pem";
-    fs::path pk_path=tmp/"pk_path.pem";
-
-    secure_crypto::sign_keygen(sk_path.string(),pk_path.string());
-    string message="This is a message to be signed";
-    string message_wrong="This is not the message to be signed";
-    vector<uint8_t> signature = secure_crypto::sign(sk_path.string(),message);
-    bool res=secure_crypto::verify(signature,pk_path.string(),message_wrong);
-    EXPECT_EQ(res,false);
-    fs::remove_all(tmp);
+TEST_F(Ed25519Test, BasicTest) {
+    const auto message = to_bytes("This is a message to be signed");
+    auto signature = secure_crypto::ed25519_sign(sk, message);
+    EXPECT_TRUE(secure_crypto::ed25519_verify(signature, pk, message));
 }
 
-TEST(Ed25519Test,Wrongtest2){
-    namespace fs=std::filesystem;
-    fs::path tmp=fs::temp_directory_path()/"ed25519";
-    fs::create_directory(tmp);
-
-    fs::path sk_path=tmp/"sk_path.pem";
-    fs::path pk_path=tmp/"pk_path.pem";
-
-    secure_crypto::sign_keygen(sk_path.string(),pk_path.string());
-    string message="This is a message to be signed";
-    vector<uint8_t> signature = secure_crypto::sign(sk_path.string(),message);
-    signature.back()^=1;
-    bool res=secure_crypto::verify(signature,pk_path.string(),message);
-    EXPECT_EQ(res,false);
-    fs::remove_all(tmp);
+TEST_F(Ed25519Test, SignatureLength) {
+    // Ed25519 签名长度固定 64 字节
+    auto signature = secure_crypto::ed25519_sign(sk, to_bytes("hello"));
+    EXPECT_EQ(signature.size(), 64u);
 }
 
-TEST(Ed25519Test,SigLenTest){
-    namespace fs=std::filesystem;
-    fs::path tmp=fs::temp_directory_path()/"ed25519";
-    fs::create_directory(tmp);
-
-    fs::path sk_path=tmp/"sk_path.pem";
-    fs::path pk_path=tmp/"pk_path.pem";
-
-    secure_crypto::sign_keygen(sk_path.string(),pk_path.string());
-    string message="This is a message to be signed";
-    vector<uint8_t> signature = secure_crypto::sign(sk_path.string(),message);
-    EXPECT_EQ(signature.size(),64);
-    fs::remove_all(tmp);
+TEST_F(Ed25519Test, WrongMessageTest) {
+    auto signature = secure_crypto::ed25519_sign(sk, to_bytes("original message"));
+    // 消息被改一个字符，验签必须失败
+    EXPECT_FALSE(secure_crypto::ed25519_verify(signature, pk, to_bytes("originaL message")));
 }
 
+TEST_F(Ed25519Test, TamperedSignatureTest) {
+    auto signature = secure_crypto::ed25519_sign(sk, to_bytes("message"));
+    signature.back() ^= 0x01; // 翻转签名最后一个比特
+    EXPECT_FALSE(secure_crypto::ed25519_verify(signature, pk, to_bytes("message")));
+}
 
+TEST_F(Ed25519Test, WrongPublicKeyTest) {
+    // 用别人的公钥验签必须失败
+    auto pk2 = (tmp / "pk2.pem").string();
+    secure_crypto::ed25519_keygen((tmp / "sk2.pem").string(), pk2);
+    auto signature = secure_crypto::ed25519_sign(sk, to_bytes("message"));
+    EXPECT_FALSE(secure_crypto::ed25519_verify(signature, pk2, to_bytes("message")));
+}
+
+TEST_F(Ed25519Test, MissingKeyFile) {
+    EXPECT_THROW(secure_crypto::ed25519_sign((tmp / "nonexistent.pem"), to_bytes("m")),
+                 std::runtime_error);
+}

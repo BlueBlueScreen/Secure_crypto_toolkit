@@ -1,7 +1,11 @@
-#include<gtest/gtest.h>
-#include<secure_crypto/utils.hpp>
-#include<secure_crypto/secure_random.hpp>
-using namespace std;
+#include <gtest/gtest.h>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <secure_crypto/utils.hpp>
+#include <secure_crypto/secure_random.hpp>
+using std::string;
+using std::vector;
 
 TEST(Base64Test,BasicTest){
     vector<uint8_t> test_1=secure_crypto::random_bytes(32);

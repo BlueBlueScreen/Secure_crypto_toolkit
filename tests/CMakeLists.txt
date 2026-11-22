@@ -1,26 +1,22 @@
-# tests/CMakeLists.txt
-
-# 查找 GTest（正确方式）
 find_package(GTest REQUIRED)
 
-# 创建测试可执行文件
-add_executable(CryptoTest
+add_executable(crypto_test
     test_aes_gcm.cpp
-    test_ecdh.cpp
+    test_x25519.cpp
     test_ed25519.cpp
     test_hkdf.cpp
+    test_secure_hash.cpp
     test_secure_random.cpp
     test_utils.cpp
-    # 注意：如果你用 GTest::gtest_main，就不需要 main.cpp！
 )
 
-# 链接库
-target_link_libraries(CryptoTest
+# GTest::gtest_main 提供 main()，无需自写
+target_link_libraries(crypto_test
     PRIVATE
-        Toolkit
+        secure_crypto_toolkit
         GTest::gtest
-        GTest::gtest_main  # 提供 main()，所以不需要你自己的 main.cpp
+        GTest::gtest_main
 )
 
-# 注册为 CTest 测试
-add_test(NAME CryptoTest COMMAND CryptoTest)
+# 注册到 CTest，支持 build 目录里直接 ctest
+add_test(NAME crypto_test COMMAND crypto_test)

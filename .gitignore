@@ -1,0 +1,16 @@
+# 构建产物
+build/
+out/
+cmake-build-*/
+
+# IDE / 工具缓存
+.cache/
+.vscode/
+.idea/
+compile_commands.json
+
+# 编译中间文件
+*.o
+*.a
+*.so
+*.dylib

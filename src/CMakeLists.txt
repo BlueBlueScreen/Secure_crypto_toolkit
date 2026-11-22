@@ -1,7 +1,6 @@
-#将源文件打包
-set(SCT_SRC
+add_library(secure_crypto_toolkit
     aes_gcm.cpp
-    ecdh.cpp
+    x25519.cpp
     ed25519.cpp
     hkdf.cpp
     secure_random.cpp
@@ -9,14 +8,9 @@ set(SCT_SRC
     utils.cpp
 )
 
-#将这些源文件编译成库
-add_library(Toolkit ${SCT_SRC})
+# 对外暴露头文件目录
+target_include_directories(secure_crypto_toolkit PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-#公开头文件目录
-target_include_directories(Toolkit PUBLIC ${PROJECT_SOURCE_DIR}/include)
-
-#链接 OPENSSL库
-#要先find_package才能链接
-find_package(OpenSSL REQUIRED)
-target_link_libraries(Toolkit PRIVATE OpenSSL::Crypto)
-
+# 要求 OpenSSL 3.0 及以上（EVP_KDF 等新接口依赖 3.0）
+find_package(OpenSSL 3.0 REQUIRED)
+target_link_libraries(secure_crypto_toolkit PRIVATE OpenSSL::Crypto)

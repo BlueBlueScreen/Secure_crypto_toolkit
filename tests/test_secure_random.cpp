@@ -1,5 +1,7 @@
-#include<gtest/gtest.h>
-#include<secure_crypto/secure_random.hpp>
+#include <gtest/gtest.h>
+#include <cstddef>
+#include <stdexcept>
+#include <secure_crypto/secure_random.hpp>
 
 TEST(SecureRandomTest,RandomBytesZero){
     auto r=secure_crypto::random_bytes(0);
